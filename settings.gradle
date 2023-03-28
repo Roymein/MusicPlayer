@@ -15,8 +15,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "MusicPlayer"
 include ':CloudMusic'
-include ':PocApp'
-include ':PluginLibiary'
 include ':ReflectionX'
 include ':BaseLibrary'
 include ':Plugin'
