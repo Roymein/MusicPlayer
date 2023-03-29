@@ -22,21 +22,20 @@ import com.android.cloud.R;
 import com.android.cloud.server.MusicService;
 
 public class MusicActivity extends AppCompatActivity implements View.OnClickListener {
-    //进度条
     private static SeekBar mSeekBar;
-    private static TextView tv_progress;
-    private static TextView tv_total;
-    //动画
-    private ObjectAnimator animator;
-    private MusicService.MusicControl musicControl;
-    private Intent intent1;
+    private static TextView sTvProgress;
+    private static TextView sTvTotal;
 
-    private boolean isUnbind = false;
+    private ObjectAnimator mAnimator;
+    private MusicService.MusicControl mMusicControl;
+    private Intent intentExtra;
+    private ImageView mIconImageView;
+    private boolean mIsUnbind = false;
 
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            musicControl = (MusicService.MusicControl) service;
+            mMusicControl = (MusicService.MusicControl) service;
         }
 
         @Override
@@ -49,36 +48,35 @@ public class MusicActivity extends AppCompatActivity implements View.OnClickList
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_music);
-        intent1 = getIntent();
+        intentExtra = getIntent();
         init();
     }
 
     private void init() {
         //进度条上小绿点的位置，也就是当前已播放时间
-        tv_progress = findViewById(R.id.tv_progress);
+        sTvProgress = findViewById(R.id.tv_progress);
         //进度条的总长度，就是总时间
-        tv_total = findViewById(R.id.tv_total);
+        sTvTotal = findViewById(R.id.tv_total);
         mSeekBar = findViewById(R.id.sb);
-        //歌曲名显示的控件
-        TextView name_song = findViewById(R.id.song_name);
-        //绑定控件的同时设置点击事件监听器
+        TextView tvSongName = findViewById(R.id.song_name);
+
         findViewById(R.id.btn_play).setOnClickListener(this);
         findViewById(R.id.btn_pause).setOnClickListener(this);
         findViewById(R.id.btn_continue_play).setOnClickListener(this);
         findViewById(R.id.btn_exit).setOnClickListener(this);
 
-        String name = intent1.getStringExtra("name");
-        name_song.setText(name);
-        //创建一个意图对象，是从当前的Activity跳转到Service
-        Intent intent2 = new Intent(this, MusicService.class);
-        bindService(intent2, mServiceConnection, BIND_AUTO_CREATE);//绑定服务
+        String name = intentExtra.getStringExtra("name");
+        tvSongName.setText(name);
+        Intent intent = new Intent(this, MusicService.class);
+
+        bindService(intent, mServiceConnection, BIND_AUTO_CREATE);
         //为滑动条添加事件监听，每个控件不同果然点击事件方法名都不同
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 //进当滑动条到末端时，结束动画
                 if (progress == seekBar.getMax()) {
-                    animator.pause();//停止播放动画
+                    mAnimator.pause();//停止播放动画
                 }
             }
 
@@ -92,27 +90,27 @@ public class MusicActivity extends AppCompatActivity implements View.OnClickList
             public void onStopTrackingTouch(SeekBar seekBar) {
                 //根据拖动的进度改变音乐播放进度
                 int progress = seekBar.getProgress();//获取seekBar的进度
-                musicControl.seekTo(progress);//改变播放进度
+                mMusicControl.seekTo(progress);//改变播放进度
             }
         });
         //声明并绑定音乐播放器的iv_music控件
-        ImageView iv_music = findViewById(R.id.iv_music);
-        String position = intent1.getStringExtra("position");
+        mIconImageView = findViewById(R.id.iv_music);
+        String position = intentExtra.getStringExtra("position");
 
         int i = Integer.parseInt(position);
-        iv_music.setImageResource(Fragment1.icons[i]);
+        mIconImageView.setImageResource(MusicFragment.sIcons[i]);
         //rotation和0f,360.0f就设置了动画是从0°旋转到360°
-        animator = ObjectAnimator.ofFloat(iv_music, "rotation", 0f, 360.0f);
-        animator.setDuration(10000);//动画旋转一周的时间为10秒
-        animator.setInterpolator(new LinearInterpolator());//匀速
-        animator.setRepeatCount(-1);//-1表示设置动画无限循环
+        mAnimator = ObjectAnimator.ofFloat(mIconImageView, "rotation", 0f, 360.0f);
+        mAnimator.setDuration(10000);//动画旋转一周的时间为10秒
+        mAnimator.setInterpolator(new LinearInterpolator());//匀速
+        mAnimator.setRepeatCount(-1);//-1表示设置动画无限循环
     }
 
     //判断服务是否被解绑
     private void unbind(boolean isUnbind) {
         //如果解绑了
         if (!isUnbind) {
-            musicControl.pausePlay();//音乐暂停播放
+            mMusicControl.pausePlay();//音乐暂停播放
             unbindService(mServiceConnection);//解绑服务
         }
     }
@@ -121,25 +119,25 @@ public class MusicActivity extends AppCompatActivity implements View.OnClickList
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_play://播放按钮点击事件
-                String position = intent1.getStringExtra("position");
+                String position = intentExtra.getStringExtra("position");
                 int i = Integer.parseInt(position);
-                musicControl.play(i);
-                animator.start();
+                mMusicControl.play(i);
+                mAnimator.start();
                 break;
 
             case R.id.btn_pause://暂停按钮点击事件
-                musicControl.pausePlay();
-                animator.pause();
+                mMusicControl.pausePlay();
+                mAnimator.pause();
                 break;
 
             case R.id.btn_continue_play://继续播放按钮点击事件
-                musicControl.continuePlay();
-                animator.start();
+                mMusicControl.continuePlay();
+                mAnimator.start();
                 break;
 
             case R.id.btn_exit://退出按钮点击事件
-                unbind(isUnbind);
-                isUnbind = true;
+                unbind(mIsUnbind);
+                mIsUnbind = true;
                 finish();
                 break;
         }
@@ -148,7 +146,7 @@ public class MusicActivity extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unbind(isUnbind);
+        unbind(mIsUnbind);
     }
 
     @SuppressLint("HandlerLeak")
@@ -179,7 +177,7 @@ public class MusicActivity extends AppCompatActivity implements View.OnClickList
                 strSecond = second + "";
             }
             //这里就显示了歌曲总时长
-            tv_total.setText(strMinute + ":" + strSecond);
+            sTvTotal.setText(String.format("%s:%s", strMinute, strSecond));
             //歌曲当前播放时长
             minute = currentPosition / 1000 / 60;
             second = currentPosition / 1000 % 60;
@@ -193,8 +191,8 @@ public class MusicActivity extends AppCompatActivity implements View.OnClickList
             } else {
                 strSecond = second + " ";
             }
-            //显示当前歌曲已经播放的时间
-            tv_progress.setText(strMinute + ":" + strSecond);
+
+            sTvProgress.setText(String.format("%s:%s", strMinute, strSecond));
         }
     };
 }

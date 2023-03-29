@@ -17,9 +17,9 @@ import java.util.TimerTask;
 public class MusicService extends Service {
 
     //声明一个MediaPlayer引用
-    private MediaPlayer player;
+    private MediaPlayer mMediaPlayer;
     //声明一个计时器引用
-    private Timer timer;
+    private Timer mTimer;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -30,21 +30,21 @@ public class MusicService extends Service {
     public void onCreate() {
         super.onCreate();
         //创建音乐播放器对象
-        player = new MediaPlayer();
+        mMediaPlayer = new MediaPlayer();
     }
 
     //添加计时器用于设置音乐播放器中的播放进度条
-    public void addTimer() {
+    private void addTimer() {
         //如果timer不存在，也就是没有引用实例
-        if (timer == null) {
+        if (mTimer == null) {
             //创建计时器对象
-            timer = new Timer();
+            mTimer = new Timer();
             TimerTask task = new TimerTask() {
                 @Override
                 public void run() {
-                    if (player == null) return;
-                    int duration = player.getDuration();//获取歌曲总时长
-                    int currentPosition = player.getCurrentPosition();//获取播放进度
+                    if (mMediaPlayer == null) return;
+                    int duration = mMediaPlayer.getDuration();//获取歌曲总时长
+                    int currentPosition = mMediaPlayer.getCurrentPosition();//获取播放进度
                     Message msg = MusicActivity.handler.obtainMessage();//创建消息对象
                     //将音乐的总时长和播放进度封装至bundle中
                     Bundle bundle = new Bundle();
@@ -57,20 +57,21 @@ public class MusicService extends Service {
                 }
             };
             //开始计时任务后的5毫秒，第一次执行task任务，以后每500毫秒（0.5s）执行一次
-            timer.schedule(task, 5, 500);
+            mTimer.schedule(task, 5, 500);
         }
     }
 
     //Binder是一种跨进程的通信方式
     public class MusicControl extends Binder {
+
         public void play(int i) {//String path
             Uri uri = Uri.parse("android.resource://" + getPackageName() + "/raw/" + "music" + i);
             try {
                 //重置音乐播放器
-                player.reset();
+                mMediaPlayer.reset();
                 //加载多媒体文件
-                player = MediaPlayer.create(getApplicationContext(), uri);
-                player.start();//播放音乐
+                mMediaPlayer = MediaPlayer.create(getApplicationContext(), uri);
+                mMediaPlayer.start();//播放音乐
                 addTimer();//添加计时器
             } catch (Exception e) {
                 e.printStackTrace();
@@ -79,28 +80,28 @@ public class MusicService extends Service {
 
         //下面的暂停继续和退出方法全部调用的是MediaPlayer自带的方法
         public void pausePlay() {
-            player.pause();//暂停播放音乐
+            mMediaPlayer.pause();//暂停播放音乐
         }
 
         public void continuePlay() {
-            player.start();//继续播放音乐
+            mMediaPlayer.start();//继续播放音乐
         }
 
         public void seekTo(int progress) {
-            player.seekTo(progress);//设置音乐的播放位置
+            mMediaPlayer.seekTo(progress);//设置音乐的播放位置
         }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (player == null) {
+        if (mMediaPlayer == null) {
             return;
         }
-        if (player.isPlaying()) {
-            player.stop();//停止播放音乐
+        if (mMediaPlayer.isPlaying()) {
+            mMediaPlayer.stop();//停止播放音乐
         }
-        player.release();//释放占用的资源
-        player = null;//将player置为空
+        mMediaPlayer.release();//释放占用的资源
+        mMediaPlayer = null;//将player置为空
     }
 }

@@ -15,62 +15,54 @@ import androidx.fragment.app.Fragment;
 
 import com.android.cloud.R;
 
-public class Fragment1 extends Fragment {
-    public String[] name = {"邓紫棋——光年之外", "蔡健雅——红色高跟鞋", "Taylor Swift——Love Story"};
-    public static int[] icons = {R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background};
+public class MusicFragment extends Fragment {
+    public String[] mName = {"邓紫棋——光年之外", "蔡健雅——红色高跟鞋", "Taylor Swift——Love Story"};
+    public static int[] sIcons = {R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background};
 
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        //绑定布局，只不过这里是用inflate()方法
         View view = inflater.inflate(R.layout.music_list, null);
-        //创建listView列表并且绑定控件
         ListView listView = view.findViewById(R.id.lv);
-        //实例化一个适配器
         MyBaseAdapter adapter = new MyBaseAdapter();
-        //列表设置适配器
         listView.setAdapter(adapter);
-        //列表元素的点击监听器
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 //创建Intent对象，参数就是从frag1跳转到MusicActivity
-                Intent intent = new Intent(Fragment1.this.getContext(), MusicActivity.class);
+                Intent intent = new Intent(MusicFragment.this.getContext(), MusicActivity.class);
                 //将歌曲名和歌曲的下标存入Intent对象
-                intent.putExtra("name", name[position]);
+                intent.putExtra("name", mName[position]);
                 intent.putExtra("position", String.valueOf(position));
-                //开始跳转
                 startActivity(intent);
             }
         });
         return view;
     }
 
-    //这里是创建一个自定义适配器，可以作为模板
     class MyBaseAdapter extends BaseAdapter {
         @Override
         public int getCount() {
-            return name.length;
+            return mName.length;
         }
 
         @Override
-        public Object getItem(int i) {
-            return name[i];
+        public Object getItem(int position) {
+            return mName[position];
         }
 
         @Override
-        public long getItemId(int i) {
-            return i;
+        public long getItemId(int position) {
+            return position;
         }
 
         @Override
-        public View getView(int i, View convertView, ViewGroup parent) {
-            //绑定好VIew，然后绑定控件
-            View view = View.inflate(Fragment1.this.getContext(), R.layout.item_layout, null);
-            TextView tv_name = view.findViewById(R.id.item_name);
-            ImageView iv = view.findViewById(R.id.iv);
-            //设置控件显示的内容，就是获取的歌曲名和歌手图片
-            tv_name.setText(name[i]);
-            iv.setImageResource(icons[i]);
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View view = View.inflate(MusicFragment.this.getContext(), R.layout.item_layout, null);
+            TextView tvName = view.findViewById(R.id.item_name);
+            ImageView imageView = view.findViewById(R.id.iv);
+            tvName.setText(mName[position]);
+            imageView.setImageResource(sIcons[position]);
             return view;
         }
     }
