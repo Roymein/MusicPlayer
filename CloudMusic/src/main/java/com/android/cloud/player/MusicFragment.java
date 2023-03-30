@@ -16,14 +16,14 @@ import androidx.fragment.app.Fragment;
 import com.android.cloud.R;
 
 public class MusicFragment extends Fragment {
-    public String[] mName = {"邓紫棋——光年之外", "蔡健雅——红色高跟鞋", "Taylor Swift——Love Story"};
+    public String[] mName = {"苏溪——红尘悠悠", "蔡健雅——红色高跟鞋", "Taylor Swift——Love Story"};
     public static int[] sIcons = {R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background};
 
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.music_list, null);
         ListView listView = view.findViewById(R.id.lv);
-        MyBaseAdapter adapter = new MyBaseAdapter();
+        MusicListAdapter adapter = new MusicListAdapter();
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -40,7 +40,7 @@ public class MusicFragment extends Fragment {
         return view;
     }
 
-    class MyBaseAdapter extends BaseAdapter {
+    class MusicListAdapter extends BaseAdapter {
         @Override
         public int getCount() {
             return mName.length;

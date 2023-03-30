@@ -29,7 +29,6 @@ public class MusicActivity extends AppCompatActivity implements View.OnClickList
     private ObjectAnimator mAnimator;
     private MusicService.MusicControl mMusicControl;
     private Intent intentExtra;
-    private ImageView mIconImageView;
     private boolean mIsUnbind = false;
 
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
@@ -94,13 +93,13 @@ public class MusicActivity extends AppCompatActivity implements View.OnClickList
             }
         });
         //声明并绑定音乐播放器的iv_music控件
-        mIconImageView = findViewById(R.id.iv_music);
+        ImageView iconImageView = findViewById(R.id.iv_music);
         String position = intentExtra.getStringExtra("position");
 
         int i = Integer.parseInt(position);
-        mIconImageView.setImageResource(MusicFragment.sIcons[i]);
+        iconImageView.setImageResource(MusicFragment.sIcons[i]);
         //rotation和0f,360.0f就设置了动画是从0°旋转到360°
-        mAnimator = ObjectAnimator.ofFloat(mIconImageView, "rotation", 0f, 360.0f);
+        mAnimator = ObjectAnimator.ofFloat(iconImageView, "rotation", 0f, 360.0f);
         mAnimator.setDuration(10000);//动画旋转一周的时间为10秒
         mAnimator.setInterpolator(new LinearInterpolator());//匀速
         mAnimator.setRepeatCount(-1);//-1表示设置动画无限循环
