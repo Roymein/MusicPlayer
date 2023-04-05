@@ -3,10 +3,12 @@ ext.androidConfig = [
         "buildToolsVersion": "",
         "targetSdkVersion" : "33",
         "minSdkVersion"    : "21",
-        "gradleVersion"    : "",
         "kotlinVersion"    : "",
 ]
 
+ext.buildConfig = [
+        gradleVersion: "7.0.3",
+]
 
 ext.deps = [
         "core-ktx": "androidx.core:core-ktx:1.7.0",
